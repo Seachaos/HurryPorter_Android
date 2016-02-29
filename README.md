@@ -7,6 +7,16 @@ A simple and easy use networking library for Android / iOS , It's cross platform
 (Here is iOS Version: https://github.com/Seachaos/HurryPorter_iOS )
 
 
+# How to use
+
+  dependencies {
+    ...
+    compile 'com.seachaos:hurryporter:0.1.0'
+  }
+
+
+https://bintray.com/seachaos/maven/HurryPorter/view
+
 ## License
 
 HurryPorter is available under the MIT license. See the LICENSE file for more info.
