@@ -10,7 +10,7 @@ android:
 
 # Override the install and test so that we don't run integration tests
 install:
-  - ./gradlew androidDependencies
+#  - ./gradlew androidDependencies
   - ./gradlew assemble --stacktrace
 
 script:
