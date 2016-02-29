@@ -1,8 +1,12 @@
 package com.seachaos.hurryporter;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.Runnable;
 import java.util.Iterator;
 
 public class HurryPorter{
@@ -10,6 +14,8 @@ public class HurryPorter{
 
     public static String Charset = "UTF-8";
     private HurryCallback userCallback = null;
+    private Handler handler;
+    private boolean useHandler = true;
 
     public interface HurryCallback{
         public JSONObject prepare(HurryPorter porter) throws JSONException;
@@ -17,7 +23,16 @@ public class HurryPorter{
         public void onFailed(HurryPorter porter, String raw);
     }
 
+    public HurryPorter(){
+        initHurry();
+    }
+
+    private void initHurry(){
+        this.handler = new Handler(Looper.getMainLooper());
+    }
+
     public void makeRequest(final HurryCallback callback, final String url){
+        useHandler = true;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -27,20 +42,26 @@ public class HurryPorter{
                         return callback.prepare(porter);
                     }
                     @Override
-                    public void onSuccess(HurryPorter porter, JSONObject json, String raw)  {
-                        callback.onSuccess(porter, json, raw);
+                    public void onSuccess(final HurryPorter porter,final JSONObject json,final String raw)  {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess(porter,json, raw);
+                            }
+                        });
                     }
 
                     @Override
                     public void onFailed(HurryPorter porter, String raw) {
-                        callback.onFailed(porter, raw);
+                        onFailedCallback(raw);
                     }
                 }, url);
             }
-        });
+        }).start();
     }
 
     public void makeRequestForTest(HurryCallback callback, String url){
+        useHandler = false;
         _makeRequest(callback, url);
     }
 
@@ -51,7 +72,7 @@ public class HurryPorter{
         try {
             json = callback.prepare(this);
         } catch (JSONException e) {
-            onFailed(ERROR_TAG+" prepare data failed:"+e.toString());
+            onFailedCallback(ERROR_TAG + " prepare data failed:" + e.toString());
             return;
         }
         Iterator<String> keys = json.keys();
@@ -78,7 +99,7 @@ public class HurryPorter{
             onReceiveResponse(callback, resp);
             return;
         }
-        onFailed(ERROR_TAG + " response is null");
+        onFailedCallback(ERROR_TAG + " response is null");
     }
 
     private void onReceiveResponse(HurryCallback callback, String resp) {
@@ -93,8 +114,17 @@ public class HurryPorter{
         callback.onSuccess(this, json, resp);
     }
 
-    private void onFailed(String reason){
+    private void onFailedCallback(final String reason){
         if(userCallback==null){
+            return;
+        }
+        if(useHandler){
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    userCallback.onFailed(HurryPorter.this, reason);
+                }
+            });
             return;
         }
         userCallback.onFailed(this, reason);
