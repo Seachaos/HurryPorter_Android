@@ -17,4 +17,13 @@ public class HurryPorterTest extends ApplicationTestCase<Application> {
         assertNotNull(resp);
         assertFalse(resp.startsWith(HurryPorter.ERROR_TAG));
     }
+
+    public void testHttpPost(){
+        HttpWand wand = new HttpWand();
+        wand.addPost("FirstName","Hurry");
+        wand.addPost("LastName","Porter");
+        String resp = wand.send("http://www.myandroid.tw/test/post.php");
+        assertNotNull(resp);
+        assertFalse(resp.startsWith(HurryPorter.ERROR_TAG));
+    }
 }

@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 
+
 android {
     compileSdkVersion 21
     buildToolsVersion "23.0.2"
@@ -23,3 +24,31 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:21.0.3'
 }
+
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'HurryPorter'
+
+    publishedGroupId = 'com.seachaos'
+    libraryName = 'HurryPorter'
+    artifact = 'hurryporter'
+
+    libraryDescription = 'A simple and easy use networking library.'
+
+    siteUrl = 'https://github.com/Seachaos/HurryPorter_Android'
+    gitUrl = 'https://github.com/Seachaos/HurryPorter_Android.git'
+
+    libraryVersion = '0.1.0'
+
+    developerId = 'Seachaos'
+    developerName = 'Ye, Jian-Yin'
+    developerEmail = 'ye.jian.yin@gmail.com'
+
+    licenseName = 'MIT'
+    licenseUrl = 'https://github.com/Seachaos/HurryPorter_Android'
+    allLicenses = ["MIT"]
+}
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
