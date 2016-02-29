@@ -20,6 +20,10 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        makeTestConnectionButton();
+    }
+
+    private void makeTestConnectionButton(){
         Button connectTest = (Button) findViewById(R.id.connectTest);
         connectTest.setOnClickListener(new View.OnClickListener() {
             @Override
