@@ -1,1 +1,2 @@
 ./gradlew assembleRelease
+./gradlew bintrayUpload

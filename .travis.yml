@@ -10,7 +10,8 @@ android:
 
 # Override the install and test so that we don't run integration tests
 install:
-#  - ./gradlew androidDependencies
+  - touch local.properties
+  - ./gradlew androidDependencies
   - ./gradlew assemble --stacktrace
 
 script:
