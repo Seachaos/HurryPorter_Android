@@ -39,7 +39,7 @@ ext {
     siteUrl = 'https://github.com/Seachaos/HurryPorter_Android'
     gitUrl = 'https://github.com/Seachaos/HurryPorter_Android.git'
 
-    libraryVersion = '0.1.3'
+    libraryVersion = '0.1.4'
 
     developerId = 'Seachaos'
     developerName = 'Ye, Jian-Yin'
