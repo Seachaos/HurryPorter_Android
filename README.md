@@ -9,10 +9,11 @@ A simple and easy use networking library for Android / iOS , It's cross platform
 
 # How to use
 
-  dependencies {
-    ...
-    compile 'com.seachaos:hurryporter:0.1.0'
-  }
+
+    dependencies {
+      ...
+      compile 'com.seachaos:hurryporter:0.1.0'
+    }
 
 
 https://bintray.com/seachaos/maven/HurryPorter/view
