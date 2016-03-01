@@ -10,6 +10,7 @@ import org.json.JSONObject;
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
 public class HurryPorterTest extends ApplicationTestCase<Application> {
+
     public HurryPorterTest() {
         super(Application.class);
     }
@@ -32,14 +33,7 @@ public class HurryPorterTest extends ApplicationTestCase<Application> {
 
     public void testHurryPorterBasic(){
         // prepare test data
-        final JSONObject testJSON = new JSONObject();
-        try {
-            testJSON.put("name","test");
-            testJSON.put("int", 1234);
-            testJSON.put("double", 123.456);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        final JSONObject testJSON = getTestJSON();
 
         // do test
         HurryPorter porter = new HurryPorter();
@@ -51,7 +45,7 @@ public class HurryPorterTest extends ApplicationTestCase<Application> {
 
             @Override
             public void onSuccess(HurryPorter porter, JSONObject json, String raw) {
-                assertTrue(raw!=null);
+                assertTrue(raw != null);
             }
 
             @Override
@@ -59,5 +53,55 @@ public class HurryPorterTest extends ApplicationTestCase<Application> {
                 assertFalse(true);
             }
         }, "http://www.myandroid.tw/test/post.php");
+    }
+
+    public void testHurryHookAlwaysFailed(){
+        // prepare test data
+        final JSONObject testJSON = getTestJSON();
+
+        // do test
+        HurryPorter porter = new HurryPorter();
+        porter.makeRequestForTest(new HurryPorter.HurryCallback() {
+            @Override
+            public JSONObject prepare(HurryPorter porter) throws JSONException {
+                porter.hookCheckResponse = new HurryPorterHook.CheckResponse() {
+                    String msg = null;
+                    @Override
+                    public boolean verifyData(HurryPorter porter, JSONObject json, String raw) throws JSONException {
+                        msg = "just error";
+                        return false;
+                    }
+                    @Override
+                    public String errorMessage(HurryPorter porter, JSONObject json, String raw) throws JSONException {
+                        return msg;
+                    }
+                };
+
+                return testJSON;
+            }
+
+            @Override
+            public void onSuccess(HurryPorter porter, JSONObject json, String raw) {
+                assertTrue(false);
+            }
+
+            @Override
+            public void onFailed(HurryPorter porter, String raw) {
+                assertTrue(true);
+                assertTrue("just error".equals(raw));
+            }
+        }, "http://www.myandroid.tw/test/post.php");
+    }
+
+    public JSONObject getTestJSON() {
+        JSONObject testJSON = new JSONObject();
+        try {
+            testJSON.put("name","test");
+            testJSON.put("int", 1234);
+            testJSON.put("double", 123.456);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return testJSON;
     }
 }

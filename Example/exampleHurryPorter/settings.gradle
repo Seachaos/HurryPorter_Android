@@ -1,1 +1,1 @@
-include ':app', ':hurryporter'
+include ':app'

@@ -17,6 +17,11 @@ public class HurryPorter{
     private Handler handler;
     private boolean useHandler = true;
 
+    public HurryPorterHook.PrepareData hookPrepareData = null;
+    public HurryPorterHook.CheckResponse hookCheckResponse = null;
+
+    public String errorMessage;
+
     public interface HurryCallback{
         public JSONObject prepare(HurryPorter porter) throws JSONException;
         public void onSuccess(HurryPorter porter, JSONObject json, String raw);
@@ -28,6 +33,8 @@ public class HurryPorter{
     }
 
     private void initHurry(){
+        this.hookPrepareData = HurryPorterHook.globalPrepareData;
+        this.hookCheckResponse = HurryPorterHook.globalCheckResponse;
         this.handler = new Handler(Looper.getMainLooper());
     }
 
@@ -96,13 +103,17 @@ public class HurryPorter{
         }
         String resp = wand.send(url);
         if(resp!=null){
-            onReceiveResponse(callback, resp);
+            try {
+                onReceiveResponse(callback, resp);
+            } catch (JSONException e) {
+                onFailedCallback(ERROR_TAG + " " + e.toString());
+            }
             return;
         }
         onFailedCallback(ERROR_TAG + " response is null");
     }
 
-    private void onReceiveResponse(HurryCallback callback, String resp) {
+    private void onReceiveResponse(HurryCallback callback, String resp) throws JSONException {
         if(userCallback==null){
             return;
         }
@@ -110,6 +121,17 @@ public class HurryPorter{
         try {
             json = new JSONObject(resp);
         } catch (JSONException e) {
+        }
+        if(hookCheckResponse!=null){
+            if(hookCheckResponse.verifyData(this, json, resp)){
+                callback.onSuccess(this, json, resp);
+            }else{
+                if(errorMessage==null){
+                    errorMessage = hookCheckResponse.errorMessage(this, json, resp);
+                }
+                onFailedCallback(errorMessage);
+            }
+            return;
         }
         callback.onSuccess(this, json, resp);
     }
