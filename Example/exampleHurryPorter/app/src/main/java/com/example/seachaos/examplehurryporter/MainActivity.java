@@ -19,15 +19,15 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        HurryPorterHook.hookGlobalPrepareData(new HurryPorterHook.PrepareData() {
-//            @Override
-//            public JSONObject willBeSent(HurryPorter porter, JSONObject json) throws JSONException {
-//                JSONObject resp = new JSONObject();
-//                resp.put("data", json.toString());
-//                resp.put("status", "1");
-//                return resp;
-//            }
-//        });
+        HurryPorterHook.hookGlobalPrepareData(new HurryPorterHook.PrepareData() {
+            @Override
+            public JSONObject willBeSent(HurryPorter porter, JSONObject json) throws JSONException {
+                JSONObject resp = new JSONObject();
+                resp.put("data", json.toString());
+                resp.put("status", "1");
+                return resp;
+            }
+        });
         HurryPorterHook.hookGlobalCheckResponse(new HurryPorterHook.CheckResponse() {
             @Override
             public boolean verifyData(HurryPorter porter, JSONObject json, String raw) throws JSONException {
@@ -57,6 +57,7 @@ public class MainActivity extends Activity {
                         JSONObject json = porter.getBaseJSON();
                         json.put("name", "value");
                         json.put("from", "EXAMPLE");
+                        json.put("status", "1");
                         return json;
                     }
 

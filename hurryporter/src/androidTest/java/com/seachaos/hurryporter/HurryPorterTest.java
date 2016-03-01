@@ -104,4 +104,17 @@ public class HurryPorterTest extends ApplicationTestCase<Application> {
         }
         return testJSON;
     }
+
+    public void testSHA256(){
+        assertTrue("2c5bca2c7e6e42730134edb68fa01461d95216f7742799daa1f1314c8d7e207e".equals(HurryPorter.SHA256("aabbccdd")));
+        assertTrue("d06e175d036e74ed0254d4a9bc59481745aaa0c197322b58f5d1b006d8106738".equals(HurryPorter.SHA256("f7742799")));
+        assertFalse("d05e175d036e74ed0254d4a9bc59481745aaa0c197322b58f5d1b006d8106738".equals(HurryPorter.SHA256("f7742799")));
+
+    }
+
+    public void testMD5(){
+        assertTrue("5734dadda4603f25bf4b4516927a87fb".equals(HurryPorter.MD5("here md5")));
+        assertTrue("1cb251ec0d568de6a929b520c4aed8d1".equals(HurryPorter.MD5("text")));
+        assertTrue("d41d8cd98f00b204e9800998ecf8427e".equals(HurryPorter.MD5("")));
+    }
 }

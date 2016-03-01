@@ -3,10 +3,14 @@ package com.seachaos.hurryporter;
 import android.os.Handler;
 import android.os.Looper;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.Runnable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 
 public class HurryPorter{
@@ -36,6 +40,51 @@ public class HurryPorter{
         this.hookPrepareData = HurryPorterHook.globalPrepareData;
         this.hookCheckResponse = HurryPorterHook.globalCheckResponse;
         this.handler = new Handler(Looper.getMainLooper());
+    }
+
+    public static String MD5(String msg){
+        MessageDigest md5 = null;
+        try
+        {
+            md5 = MessageDigest.getInstance("MD5");
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+            return "";
+        }
+
+        char[] charArray = msg.toCharArray();
+        byte[] byteArray = new byte[charArray.length];
+
+        for(int i = 0; i < charArray.length; i++)
+        {
+            byteArray[i] = (byte)charArray[i];
+        }
+        byte[] md5Bytes = md5.digest(byteArray);
+
+        StringBuffer hexValue = new StringBuffer();
+        for( int i = 0; i < md5Bytes.length; i++)
+        {
+            int val = ((int)md5Bytes[i])&0xff;
+            if(val < 16)
+            {
+                hexValue.append("0");
+            }
+            hexValue.append(Integer.toHexString(val));
+        }
+        return hexValue.toString();
+    }
+
+    public static String SHA256(String msg){
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(msg.getBytes("UTF-8"));
+            byte[] digest = md.digest();
+            return  String.format("%064x", new java.math.BigInteger(1, digest));
+        } catch (UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException e) {
+        }
+        return null;
     }
 
     public void makeRequest(final HurryCallback callback, final String url){
@@ -83,6 +132,9 @@ public class HurryPorter{
         JSONObject json = null;
         try {
             json = callback.prepare(this);
+            if(hookPrepareData!=null){
+                json = hookPrepareData.willBeSent(this, json);
+            }
         } catch (JSONException e) {
             onFailedCallback(ERROR_TAG + " prepare data failed:" + e.toString());
             return;
@@ -96,9 +148,15 @@ public class HurryPorter{
                 if(obj instanceof String){
                     String value = (String) obj;
                     wand.addPost(name, value);
-                }else if(obj instanceof Integer){
+                }else if(obj instanceof Integer) {
                     int value = (int) obj;
                     wand.addPost(name, value);
+                }else if(obj instanceof JSONObject){
+                    JSONObject value = (JSONObject) obj;
+                    wand.addPost(name, value.toString());
+                }else if(obj instanceof JSONArray){
+                    JSONArray value = (JSONArray) obj;
+                    wand.addPost(name, value.toString());
                 }else{
                     String value = json.getString(name);
                     wand.addPost(name, value);

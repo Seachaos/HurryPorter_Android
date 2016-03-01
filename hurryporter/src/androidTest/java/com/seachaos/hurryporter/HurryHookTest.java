@@ -79,5 +79,36 @@ public class HurryHookTest extends ApplicationTestCase<Application> {
         }, "http://www.myandroid.tw/test/post.php");
     }
 
+    public void testPrepareDataHook(){
+        HurryPorter porter = new HurryPorter();
+        porter.makeRequestForTest(new HurryPorter.HurryCallback() {
+            @Override
+            public JSONObject prepare(HurryPorter porter) throws JSONException {
+                JSONObject json = porter.getBaseJSON();
+                json.put("request", "1");
+                porter.hookPrepareData = new HurryPorterHook.PrepareData() {
+                    @Override
+                    public JSONObject willBeSent(HurryPorter porter, JSONObject json) throws JSONException {
+                        JSONObject resp = new JSONObject();
+                        resp.put("warp_WBS", json);
+                        resp.put("request", "1");
+                        return resp;
+                    }
+                };
+                return json;
+            }
+
+            @Override
+            public void onSuccess(HurryPorter porter, JSONObject json, String raw) {
+                assertTrue(raw.contains("warp_WBS"));
+            }
+
+            @Override
+            public void onFailed(HurryPorter porter, String raw) {
+                assertTrue(raw.contains("warp_WBS"));
+
+            }
+        }, "http://www.myandroid.tw/test/post.php");
+    }
 }
 
