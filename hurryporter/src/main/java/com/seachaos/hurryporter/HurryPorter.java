@@ -59,8 +59,13 @@ public class HurryPorter{
                     }
 
                     @Override
-                    public void onFailed(HurryPorter porter, String raw) {
-                        onFailedCallback(raw);
+                    public void onFailed(final HurryPorter porter, final String raw) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onFailed(porter, raw);
+                            }
+                        });
                     }
                 }, url);
             }

@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.seachaos.hurryporter.HurryPorter;
+import com.seachaos.hurryporter.HurryPorterHook;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,6 +18,27 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        HurryPorterHook.hookGlobalPrepareData(new HurryPorterHook.PrepareData() {
+//            @Override
+//            public JSONObject willBeSent(HurryPorter porter, JSONObject json) throws JSONException {
+//                JSONObject resp = new JSONObject();
+//                resp.put("data", json.toString());
+//                resp.put("status", "1");
+//                return resp;
+//            }
+//        });
+        HurryPorterHook.hookGlobalCheckResponse(new HurryPorterHook.CheckResponse() {
+            @Override
+            public boolean verifyData(HurryPorter porter, JSONObject json, String raw) throws JSONException {
+                return "1".equals(json.getString("status"));
+            }
+
+            @Override
+            public String errorMessage(HurryPorter porter, JSONObject json, String raw) throws JSONException {
+                return "ERROR";
+            }
+        });
 
         makeTestConnectionButton();
     }
