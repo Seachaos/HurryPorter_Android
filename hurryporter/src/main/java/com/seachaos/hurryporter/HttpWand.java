@@ -1,5 +1,14 @@
 package com.seachaos.hurryporter;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -11,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by seachaos on 2/29/16.
@@ -194,7 +204,33 @@ class HttpWand {
         outputStream.close();
     }
 
+
     public String send(String url){
+        HttpPost httpRequest = new HttpPost(url);
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+
+        for(int ax=0;ax<postData.size();ax++){
+            NameValue data = postData.get(ax);
+            params.add(new BasicNameValuePair(data.getName(), data.getValue()));
+        }
+
+        try {
+            httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+            HttpResponse httpResponse = new DefaultHttpClient()
+                    .execute(httpRequest);
+
+            if (httpResponse.getStatusLine().getStatusCode() == 200) {
+                String strResult = EntityUtils.toString(httpResponse
+                        .getEntity());
+                return strResult;
+            }
+        }catch (Exception e){
+
+        }
+        return null;
+    }
+
+    public String _send(String url){
         try {
             connection = _initURLConnection(url);
             if(connection==null){
