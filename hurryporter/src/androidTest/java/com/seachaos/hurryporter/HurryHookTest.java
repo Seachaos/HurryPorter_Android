@@ -50,7 +50,7 @@ public class HurryHookTest extends ApplicationTestCase<Application> {
             }
 
             @Override
-            public void onFailed(HurryPorter porter, String raw) {
+            public void onFailed(HurryPorter porter, String raw , int errorCode) {
                 assertTrue(false);
             }
         }, "http://www.myandroid.tw/test/post.php");
@@ -72,7 +72,7 @@ public class HurryHookTest extends ApplicationTestCase<Application> {
             }
 
             @Override
-            public void onFailed(HurryPorter porter, String raw) {
+            public void onFailed(HurryPorter porter, String raw, int errorCode) {
                 assertTrue(true);
                 assertTrue("errorMessage_HPH".equals(raw));
             }
@@ -104,7 +104,7 @@ public class HurryHookTest extends ApplicationTestCase<Application> {
             }
 
             @Override
-            public void onFailed(HurryPorter porter, String raw) {
+            public void onFailed(HurryPorter porter, String raw, int errorCode) {
                 assertTrue(raw.contains("warp_WBS"));
 
             }

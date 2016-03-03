@@ -20,6 +20,9 @@ public class HurryPorter{
     private HurryCallback userCallback = null;
     private Handler handler;
     private boolean useHandler = true;
+    public int errorCode = 0;
+    public JSONObject responseJSON;
+    public String responseContent;
 
     public HurryPorterHook.PrepareData hookPrepareData = null;
     public HurryPorterHook.CheckResponse hookCheckResponse = null;
@@ -29,7 +32,7 @@ public class HurryPorter{
     public interface HurryCallback{
         public JSONObject prepare(HurryPorter porter) throws JSONException;
         public void onSuccess(HurryPorter porter, JSONObject json, String raw);
-        public void onFailed(HurryPorter porter, String raw);
+        public void onFailed(HurryPorter porter, String raw, int errorCode);
     }
 
     public HurryPorter(){
@@ -108,11 +111,11 @@ public class HurryPorter{
                     }
 
                     @Override
-                    public void onFailed(final HurryPorter porter, final String raw) {
+                    public void onFailed(final HurryPorter porter, final String raw, final int errorCode) {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                callback.onFailed(porter, raw);
+                                callback.onFailed(porter, raw, errorCode);
                             }
                         });
                     }
@@ -136,7 +139,7 @@ public class HurryPorter{
                 json = hookPrepareData.willBeSent(this, json);
             }
         } catch (JSONException e) {
-            onFailedCallback(ERROR_TAG + " prepare data failed:" + e.toString());
+            onFailedCallback(ERROR_TAG + " prepare data failed:" + e.toString(), this.errorCode);
             return;
         }
         Iterator<String> keys = json.keys();
@@ -169,22 +172,24 @@ public class HurryPorter{
             try {
                 onReceiveResponse(callback, resp);
             } catch (JSONException e) {
-                onFailedCallback(ERROR_TAG + " " + e.toString());
+                onFailedCallback(ERROR_TAG + " " + e.toString(), this.errorCode);
             }
             return;
         }
-        onFailedCallback(ERROR_TAG + " response is null");
+        onFailedCallback(ERROR_TAG + " response is null", this.errorCode);
     }
 
     private void onReceiveResponse(HurryCallback callback, String resp) throws JSONException {
         if(userCallback==null){
             return;
         }
+        responseContent = resp;
         JSONObject json = null;
         try {
             json = new JSONObject(resp);
         } catch (JSONException e) {
         }
+        responseJSON = json;
         if(hookCheckResponse!=null){
             if(hookCheckResponse.verifyData(this, json, resp)){
                 callback.onSuccess(this, json, resp);
@@ -192,27 +197,28 @@ public class HurryPorter{
                 if(errorMessage==null){
                     errorMessage = hookCheckResponse.errorMessage(this, json, resp);
                 }
-                onFailedCallback(errorMessage);
+                onFailedCallback(errorMessage, this.errorCode);
             }
             return;
         }
         callback.onSuccess(this, json, resp);
     }
 
-    private void onFailedCallback(final String reason){
+    private void onFailedCallback(final String reason, final int _errorCode){
         if(userCallback==null){
             return;
         }
+        this.errorCode = _errorCode;
         if(useHandler){
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    userCallback.onFailed(HurryPorter.this, reason);
+                    userCallback.onFailed(HurryPorter.this, reason, _errorCode);
                 }
             });
             return;
         }
-        userCallback.onFailed(this, reason);
+        userCallback.onFailed(this, reason, _errorCode);
     }
 
     public JSONObject getBaseJSON(){

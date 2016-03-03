@@ -12,7 +12,7 @@ A simple and easy use networking library for Android / iOS , It's cross platform
 
     dependencies {
       ...
-      compile 'com.seachaos:hurryporter:0.1.5'
+      compile 'com.seachaos:hurryporter:0.1.6'
     }
 
 
