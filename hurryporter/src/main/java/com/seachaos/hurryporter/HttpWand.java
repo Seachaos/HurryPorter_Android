@@ -105,8 +105,10 @@ class HttpWand {
     }
 
     public void addPost(String name, String value){
-        name = urlencode(name);
-        value = urlencode(value);
+        if(HurryPorter.beforePostUseURLEncode) {
+            name = urlencode(name);
+            value = urlencode(value);
+        }
         postData.add(new NameValue(name, value));
     }
     public void addPost(String name, int value){
