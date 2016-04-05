@@ -2,8 +2,13 @@ package com.seachaos.hurryporter;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.SocketFactory;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
@@ -22,6 +27,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+
 /**
  * Created by seachaos on 2/29/16.
  */
@@ -39,6 +46,7 @@ class HttpWand {
     private String boundary = "*****";
     private HttpURLConnection connection;
     private String responseCookie;
+    protected int httpStatusCode = 0;
 
     class NameValue {
         private String _name,_value;
@@ -208,7 +216,12 @@ class HttpWand {
 
 
     public String send(String url){
+
+//        SchemeRegistry schemeRegistry = new SchemeRegistry();
+//        schemeRegistry.register(new Scheme("https", (SocketFactory) new NoSSLv3Factory(), 443));
+
         HttpPost httpRequest = new HttpPost(url);
+
         List<NameValuePair> params = new ArrayList<NameValuePair>();
 
         for(int ax=0;ax<postData.size();ax++){
@@ -218,16 +231,19 @@ class HttpWand {
 
         try {
             httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-            HttpResponse httpResponse = new DefaultHttpClient()
-                    .execute(httpRequest);
+//            client = new DefaultHttpClient();
+            HttpClient client = TlsOnlySocketFactory.createHttpClient();
+            HttpResponse httpResponse = client.execute(httpRequest);
 
-            if (httpResponse.getStatusLine().getStatusCode() == 200) {
+            httpStatusCode = httpResponse.getStatusLine().getStatusCode();
+            if (httpStatusCode == 200) {
                 String strResult = EntityUtils.toString(httpResponse
                         .getEntity());
                 return strResult;
             }
         }catch (Exception e){
-
+            String error = e.toString();
+            error = e.toString();
         }
         return null;
     }

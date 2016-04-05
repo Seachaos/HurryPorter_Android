@@ -31,6 +31,16 @@ public class HurryPorterTest extends ApplicationTestCase<Application> {
         assertFalse(resp.startsWith(HurryPorter.ERROR_TAG));
     }
 
+    public void testHttpsPost(){
+        String target = "https://httpbin.org/post";
+        HttpWand wand = new HttpWand();
+        wand.addPost("FirstName","Hurry");
+        wand.addPost("LastName","Porter");
+        String resp = wand.send(target);
+        assertNotNull(resp);
+        assertFalse(resp.startsWith(HurryPorter.ERROR_TAG));
+    }
+
     public void testHurryPorterBasic(){
         // prepare test data
         final JSONObject testJSON = getTestJSON();
@@ -49,7 +59,7 @@ public class HurryPorterTest extends ApplicationTestCase<Application> {
             }
 
             @Override
-            public void onFailed(HurryPorter porter, String raw) {
+            public void onFailed(HurryPorter porter, String raw, int errorCode) {
                 assertFalse(true);
             }
         }, "http://www.myandroid.tw/test/post.php");
@@ -86,7 +96,7 @@ public class HurryPorterTest extends ApplicationTestCase<Application> {
             }
 
             @Override
-            public void onFailed(HurryPorter porter, String raw) {
+            public void onFailed(HurryPorter porter, String raw, int errorCode) {
                 assertTrue(true);
                 assertTrue("just error".equals(raw));
             }

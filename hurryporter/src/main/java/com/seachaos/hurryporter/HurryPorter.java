@@ -23,6 +23,7 @@ public class HurryPorter{
     private boolean useHandler = true;
 
     public int errorCode = 0;
+    public int httpStatusCode = 0;
     public JSONObject responseJSON;
     public String responseContent;
 
@@ -170,6 +171,7 @@ public class HurryPorter{
             }
         }
         String resp = wand.send(url);
+        this.httpStatusCode = wand.httpStatusCode;
         if(resp!=null){
             try {
                 onReceiveResponse(callback, resp);
