@@ -48,7 +48,7 @@ public class MainActivity extends ActionBarActivity {
                     public void onFailed(HurryPorter porter, String raw, int errorCode) {
                         toast("failed:"+raw);
                     }
-                }, "http://www.myandroid.tw/test/post.php");
+                }, "https://www.myandroid.tw/test/post.php");
             }
         });
     }
