@@ -1,26 +1,20 @@
 package com.seachaos.hurryporter;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by seachaos on 2/29/16.
@@ -29,14 +23,14 @@ class HttpWand {
     private static String Charset = HurryPorter.Charset;
 
     private ArrayList<NameValue>
-        headerData = new ArrayList<NameValue>(),
-        postData = new ArrayList<NameValue>(),
-        cookieData = new ArrayList<NameValue>();
+            headerData = new ArrayList<NameValue>(),
+            postData = new ArrayList<NameValue>(),
+            cookieData = new ArrayList<NameValue>();
     private ArrayList<fileInfo> files = new ArrayList<fileInfo>();
 
-    private String end = "\r\n";
-    private String twoHyphens = "--";
-    private String boundary = "*****";
+//    private String end = "\r\n";
+//    private String twoHyphens = "--";
+//    private String boundary = "*****";
     private HttpURLConnection connection;
     private String responseCookie;
 
@@ -105,10 +99,8 @@ class HttpWand {
     }
 
     public void addPost(String name, String value){
-        if(HurryPorter.beforePostUseURLEncode) {
-            name = urlencode(name);
-            value = urlencode(value);
-        }
+        name = urlencode(name);
+        value = urlencode(value);
         postData.add(new NameValue(name, value));
     }
     public void addPost(String name, int value){
@@ -121,26 +113,7 @@ class HttpWand {
     public void addCookie(String name,String value){
         name = urlencode(name);
         value = urlencode(value);
-        cookieData.add(new NameValue(name,value));
-    }
-
-    public void appendFile(String inputName,String fileName,String filePath){
-        fileInfo fe = new fileInfo();
-        fe.inputName = inputName;
-        fe.fileName = fileName;
-        fe.reallyFilePath = filePath;
-        files.add(fe);
-    }
-
-    private void _writePostValue(DataOutputStream outputStream) throws IOException{
-        for(int ax=0;ax<postData.size();ax++){
-            NameValue data = postData.get(ax);
-            outputStream.writeBytes(twoHyphens+boundary+end);
-            outputStream.writeBytes("Content-Disposition: form-data;");
-            outputStream.writeBytes("name=\""+data.getName()+"\""+end+end);
-            outputStream.write(data.getValue().getBytes("UTF-8"));
-            outputStream.writeBytes(end);
-        }
+        cookieData.add(new NameValue(name, value));
     }
 
     private HttpURLConnection _initURLConnection(String sendURL) throws IOException {
@@ -156,7 +129,7 @@ class HttpWand {
 
     private void prepareHeaders(){
         addHeader("Charset", HurryPorter.Charset);
-        addHeader("Content-Type", "multipart/form-data;boundary=" + boundary);
+//        addHeader("Content-Type", "charset=utf-8;multipart/form-data;boundary=" + boundary);
     }
 
 
@@ -181,58 +154,15 @@ class HttpWand {
         }
     }
 
-    private void _fileUpload(DataOutputStream outputStream) throws IOException{
-        for(int ax=0;ax<files.size();ax++){
-            fileInfo fe = files.get(ax);
-            outputStream.writeBytes(twoHyphens+boundary+end);
-            outputStream.writeBytes("Content-Disposition: form-data;");
-            //Log.d("msg",fe.fileName);
-            outputStream.writeBytes("name=\""+fe.inputName+"\";filename=\""+fe.fileName+"\""+end+end);
-            int bufferSize = 1024;
-            int length = -1;
-            byte[] buffer = new byte[bufferSize];
-            FileInputStream fStream = new FileInputStream(fe.reallyFilePath);
-            while((length = fStream.read(buffer))!=-1){
-                outputStream.write(buffer,0,length);
-            }
-            outputStream.writeBytes(end);
-        }
-    }
-
     private void _closeOutputStream(DataOutputStream outputStream) throws IOException{
-        outputStream.writeBytes(twoHyphens+boundary+twoHyphens+end);
+//        outputStream.writeBytes(twoHyphens+boundary+twoHyphens+end);
         // close stream
         outputStream.flush();
         outputStream.close();
     }
-
+    
 
     public String send(String url){
-        HttpPost httpRequest = new HttpPost(url);
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
-
-        for(int ax=0;ax<postData.size();ax++){
-            NameValue data = postData.get(ax);
-            params.add(new BasicNameValuePair(data.getName(), data.getValue()));
-        }
-
-        try {
-            httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-            HttpResponse httpResponse = new DefaultHttpClient()
-                    .execute(httpRequest);
-
-            if (httpResponse.getStatusLine().getStatusCode() == 200) {
-                String strResult = EntityUtils.toString(httpResponse
-                        .getEntity());
-                return strResult;
-            }
-        }catch (Exception e){
-
-        }
-        return null;
-    }
-
-    public String _send(String url){
         try {
             connection = _initURLConnection(url);
             if(connection==null){
@@ -249,7 +179,6 @@ class HttpWand {
             DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
             // write data to server
             _writePostValue(outputStream);
-            _fileUpload(outputStream);
 
             // close for response
             _closeOutputStream(outputStream);
@@ -278,6 +207,32 @@ class HttpWand {
             return null;
         }
         return utf8;
+    }
+
+    private void _writePostValue(DataOutputStream outputStream) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+        writer.write(getQueryString());
+        writer.flush();
+        writer.close();
+    }
+
+    private String getQueryString() throws UnsupportedEncodingException
+    {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for(int ax=0;ax<postData.size();ax++) {
+            NameValue pair = postData.get(ax);
+            if (first)
+                first = false;
+            else
+                result.append("&");
+
+            result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+        }
+
+        return result.toString();
     }
 
     private ByteArrayOutputStream getServerByteArrayResponse(){
