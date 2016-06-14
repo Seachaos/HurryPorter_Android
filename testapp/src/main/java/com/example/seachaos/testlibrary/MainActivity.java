@@ -35,6 +35,7 @@ public class MainActivity extends ActionBarActivity {
                     public JSONObject prepare(HurryPorter porter) throws JSONException {
                         JSONObject json = porter.getBaseJSON();
                         json.put("name", "value");
+                        json.put("value", "UTF@8, 說你好");
                         return json;
                     }
 

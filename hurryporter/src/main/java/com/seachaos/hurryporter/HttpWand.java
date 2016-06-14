@@ -129,6 +129,7 @@ class HttpWand {
 
     private void prepareHeaders(){
         addHeader("Charset", HurryPorter.Charset);
+        addHeader("Content-Type", "application/x-www-form-urlencoded");
 //        addHeader("Content-Type", "charset=utf-8;multipart/form-data;boundary=" + boundary);
     }
 
@@ -227,9 +228,9 @@ class HttpWand {
             else
                 result.append("&");
 
-            result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
+            result.append(pair.getName());
             result.append("=");
-            result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+            result.append(pair.getValue());
         }
 
         return result.toString();
